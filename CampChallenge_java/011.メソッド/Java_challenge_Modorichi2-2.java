@@ -11,20 +11,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.util.ArrayList;
-
 /**
  *
  * @author Sanosuke
  */
 public class Java_challenge_Modorichi2 extends HttpServlet {
-    ArrayList<String> datas = new ArrayList<String>(){
-        {
-        add("ID");
-        add("生年月日");
-        add("住所");
-        }
-    };
+    String[] datas(){
+        String[] kojin ={"ID", "生年月日", "住所"};
+        return kojin;
+    }
+    
+    
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -40,14 +37,16 @@ public class Java_challenge_Modorichi2 extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             
-            for (int i = 0; i < datas.size(); i++){
-                if(i == 0){
+            String[] tester = datas();
+            for (int i = 0;i < 3; i++){
+                if (i ==0){
                     continue;
                 }
-                out.print(datas.get(i));
+                out.print(tester[i]);
             }
-        }
-    }
+                    
+                    }
+                    }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
