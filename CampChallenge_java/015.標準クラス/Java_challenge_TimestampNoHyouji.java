@@ -47,7 +47,7 @@ public class Java_challenge_TimestampNoHyouji extends HttpServlet {
             out.println(d.getTime());
             
             //表示のフォーマットを変更&表示方法の設定
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 HH時mm分ss秒");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd日 HH:mm:ss");
             
             //日付を文字列に変換
             String DateString = sdf.format(d);
