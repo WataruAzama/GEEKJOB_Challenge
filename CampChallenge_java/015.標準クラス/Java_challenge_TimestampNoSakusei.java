@@ -40,7 +40,7 @@ public class Java_challenge_TimestampNoSakusei extends HttpServlet {
             c.set(2016,0,1,0,0,0);
             Date d = c.getTime();
             
-            out.print(d);
+            out.print(d.getTime());
             
         }
     }
