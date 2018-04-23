@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Cookie;
 
 /**
  *
@@ -44,9 +45,20 @@ public class SessionNoSakusei extends HttpServlet {
             out.print("今の時刻は"+dateString+"です。<br><br>");
             //セッションを生成・登録
             HttpSession hs = request.getSession();
-            hs.setAttribute("Data",now);
-            //セッション情報を取得
-            out.print(hs.getAttribute("Data"));
+            hs.setAttribute("Data",dateString);
+            //cookieを生成・セッション情報を取得
+            Cookie c = new Cookie("cData",(String)hs.getAttribute("Data"));
+            //cookieに送る
+            response.addCookie(c);
+            //cookieから呼び出し
+            Cookie[] cs = request.getCookies();
+            if (cs != null){
+                for(int i=0; i<cs.length; i++){
+                    if (cs[i].getName().equals("cData")){
+                        out.print("最後のログインは"+cs[i].getValue()+"です。");
+                    }
+                }
+            }
         }
     }
 
