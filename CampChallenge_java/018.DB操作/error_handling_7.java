@@ -45,9 +45,9 @@ public class error_handling_7 extends HttpServlet {
                 "jdbc:mysql://localhost:3306/Challenge_db?useUnicode=true&characterEncoding=utf8",
                         "wataru","magotyan");
                 //profilesID・1番を取得
-//                db_st = db_con.prepareStatement("update profiles set name = '安座間 渉' , tel = '080-5406-6625' , age =26 , birthday = '1991-06-25' where profilesID = ?");
-//                db_st.setInt(1,1);
-//                db_st.executeUpdate();
+                db_st = db_con.prepareStatement("update profiles set name = '安座間 渉' , tel = '080-5406-6625' , age =26 , birthday = '1991-06-25' where profilesID = ?");
+                db_st.setInt(1,1);
+                db_st.executeUpdate();
                 //全て表示
                 db_st = db_con.prepareStatement("select * from profiles");
                 db_data = db_st.executeQuery();

@@ -60,7 +60,7 @@ public class error_handling_11_2 extends HttpServlet {
                 db_st.setString(4, birthday);
                 db_st.setInt(5,profilesID);
                 db_st.executeUpdate();
-//57行目まで読み込んでからエラーに飛ぶ                
+                
                 db_st = db_con.prepareStatement("select * from profiles");
                 db_data = db_st.executeQuery();
                 while (db_data.next()) {

@@ -13,6 +13,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>JSP Page</title>
         
+        <!-- ログアウトで初期画面に戻る -->
         <script type="text/javascript">
             function goServletA(){location.href = "./error_handling_13_1.html";}
         </script>
@@ -35,8 +36,10 @@
                     db_con = DriverManager.getConnection(                        
                             "jdbc:mysql://localhost:3306/Challenge_db?useUnicode=true&characterEncoding=utf8",
                                      ID,pass);
+                    
                     //submitで同じページに戻る
                     out.print("<form action=\"./error_handling_13_2.jsp\" method=\"post\">");
+                    
                     //入力フォーム
                     out.print("<input type=\"text\" name=\"productCord\" placeholder=\"商品コード\">");
                     out.print("<input type=\"text\" name=\"type\" placeholder=\"種類\">");
