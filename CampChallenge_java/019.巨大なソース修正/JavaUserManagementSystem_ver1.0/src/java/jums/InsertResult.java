@@ -35,17 +35,29 @@ public class InsertResult extends HttpServlet {
         try{
             //ユーザー情報に対応したJavaBeansオブジェクトに格納していく
             UserDataDTO userdata = new UserDataDTO();
-            userdata.setName((String)session.getAttribute("name"));
+            UserDataBeans udb = new UserDataBeans();
+            //udbにセッションから値を戻す
+            udb.setting((UserDataBeans)session.getAttribute("udb"),request);
+            //DTOに名前を格納
+            userdata.setName(udb.getName());            
+            //生年月日をまとめて格納
             Calendar birthday = Calendar.getInstance();
+            birthday.set(Integer.parseInt(udb.getYear()),
+                    Integer.parseInt(udb.getMonth())-1,
+                    Integer.parseInt(udb.getDay()));
             userdata.setBirthday(birthday.getTime());
-            userdata.setType(Integer.parseInt((String)session.getAttribute("type")));
-            userdata.setTell((String)session.getAttribute("tell"));
-            userdata.setComment((String)session.getAttribute("comment"));
+            //残りを格納
+            userdata.setType(Integer.parseInt(udb.getType()));
+            userdata.setTell(udb.getTell());
+            userdata.setComment(udb.getComment());
             
-            //DBへデータの挿入
+            //DBへデータの挿入、結果の表示
             UserDataDAO .getInstance().insert(userdata);
-            
             request.getRequestDispatcher("/insertresult.jsp").forward(request, response);
+            
+            //セッションの破棄
+            session.invalidate();
+            
         }catch(Exception e){
             //データ挿入に失敗したらエラーページにエラー文を渡して表示
             request.setAttribute("error", e.getMessage());

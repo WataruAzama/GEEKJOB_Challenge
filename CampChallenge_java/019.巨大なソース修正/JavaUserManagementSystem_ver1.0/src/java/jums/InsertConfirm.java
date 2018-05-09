@@ -32,28 +32,43 @@ public class InsertConfirm extends HttpServlet {
             String accesschk = request.getParameter("ac");
             if(accesschk ==null || (Integer)session.getAttribute("ac")!=Integer.parseInt(accesschk)){
                 throw new Exception("不正なアクセスです");
-            }
+            }                        
             
-            //フォームからの入力を取得
-            String name = request.getParameter("name");
+            //値が入力されていない時にエラーにする
             String year = request.getParameter("year");
             String month = request.getParameter("month");
             String day = request.getParameter("day");
-            String type = request.getParameter("type");
             String tell = request.getParameter("tell");
             String comment = request.getParameter("comment");
+            //生年月日のエラー
+            if (year.length() == 0 || month.length() == 0 || day.length() == 0) {
+                request.setAttribute("error","生年月日の入力が不完全です。");
+                request.getRequestDispatcher("/error.jsp").forward(request, response);
+            //電話番号で未入力、英字、全角をはじく処理(特殊文字はスルー)
+            } else if (tell.length() == 0 || tell.matches(".*[a-zA-Z].*") || tell.getBytes().length != tell.length()){
+                request.setAttribute("error","電話番号を半角で入力してください。");
+                request.getRequestDispatcher("/error.jsp").forward(request, response);
+            //自己紹介文未入力もエラー
+            } else if (comment.length() == 0){
+                request.setAttribute("error","自己紹介文を入力してください。");
+                request.getRequestDispatcher("/error.jsp").forward(request, response);
+            } else{
+                
+                //正確な値を入力された場合、新規作成JavaBeansに格納
+                UserDataBeans userdata = new UserDataBeans();
+                userdata.setName(request.getParameter("name"));
+                userdata.setYear(year);
+                userdata.setMonth(month);
+                userdata.setDay(day);
+                userdata.setType(request.getParameter("type"));
+                userdata.setTell(request.getParameter("tell"));
+                userdata.setComment(request.getParameter("comment"));
 
-            //セッションに格納
-            session.setAttribute("name", name);
-            session.setAttribute("year", year);
-            session.setAttribute("month",month);
-            session.setAttribute("day", day);
-            session.setAttribute("type", type);
-            session.setAttribute("tell", tell);
-            session.setAttribute("comment", comment);
-            System.out.println("Session updated!!");
-            
-            request.getRequestDispatcher("/insertconfirm.jsp").forward(request, response);
+                //セッションに格納
+                UserDataBeans.getInstance().insert(userdata,request);
+
+                request.getRequestDispatcher("/insertconfirm.jsp").forward(request, response);
+            }
         }catch(Exception e){
             request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/error.jsp").forward(request, response);
