@@ -2,7 +2,7 @@
         import="jums.UserDataDTO" %>
 <%
     JumsHelper jh = JumsHelper.getInstance();
-    UserDataDTO udd = (UserDataDTO)request.getAttribute("resultData");
+    UserDataDTO udd = (UserDataDTO)request.getAttribute("reData");
 %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -21,9 +21,15 @@
         登録日時:<%= udd.getNewDate()%><br>
         <form action="Update" method="POST">
         <input type="submit" name="update" value="変更"style="width:100px">
+        <input type="hidden" name="ID" value="<%= udd.getUserID()%>">
         </form>
         <form action="Delete" method="POST">
         <input type="submit" name="delete" value="削除"style="width:100px">
+        <input type="hidden" name="ID" value="<%= udd.getUserID()%>">
+        </form>
+        <form action="SearchResult" method="POST">
+        <input type="submit" name="result" value="検索結果に戻る" style="width:100px">        
         </form>
     </body>
+    <%=jh.home()%>
 </html>

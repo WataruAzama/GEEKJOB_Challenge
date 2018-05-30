@@ -2,7 +2,8 @@
         import="jums.UserDataDTO" %>
 <%
     JumsHelper jh = JumsHelper.getInstance();
-    UserDataDTO udd = (UserDataDTO)request.getAttribute("resultData");
+    UserDataDTO udd = (UserDataDTO)request.getAttribute("deleteUDB");
+    String str = (String)request.getAttribute("ID");
 %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -23,9 +24,12 @@
     
     <form action="DeleteResult" method="POST">
       <input type="submit" name="YES" value="はい"style="width:100px">
+      <input type="hidden" name="ID" value="<%=str%>">
     </form><br>
     <form action="ResultDetail" method="POST">
-      <input type="submit" name="NO" value="詳細画面に戻る"style="width:100px">
+      <input type="submit" name="NO" value="いいえ(戻る)"style="width:100px">
+      <input type="hidden" name="ID" value="<%=str%>">
     </form>
+    <%=jh.home()%>
     </body>
 </html>

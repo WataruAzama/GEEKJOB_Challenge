@@ -26,19 +26,34 @@ public class UpdateResult extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        try {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet UpdateResult</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet UpdateResult at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        } finally {
-            out.close();
+        
+        try{
+            request.setCharacterEncoding("UTF-8");//リクエストパラメータの文字コードをUTF-8に変更
+            
+            UserDataBeans udb = new UserDataBeans();
+            udb.setName(request.getParameter("name"));
+            udb.setYear(request.getParameter("year"));
+            udb.setMonth(request.getParameter("month"));
+            udb.setDay(request.getParameter("day"));
+            udb.setTell(request.getParameter("tell"));
+            udb.setType(request.getParameter("type"));
+            udb.setComment(request.getParameter("comment"));
+            
+            UserDataDTO dto = new UserDataDTO();
+            udb.UD2DTOMapping(dto);
+            int id = Integer.parseInt(request.getParameter("ID"));
+            dto.setUserID(id);
+            //DAOを使用しDTOをDBにアップデート
+            UserDataDAO.getInstance().update(dto);
+            
+            request.setAttribute("upUDB",udb);
+            request.setAttribute("ID", request.getParameter("ID"));
+            
+            request.getRequestDispatcher("/updateresult.jsp").forward(request, response);
+        }catch(Exception e){
+            //何らかの理由で失敗したらエラーページにエラー文を渡して表示。想定は不正なアクセスとDBエラー
+            request.setAttribute("error", e.getMessage());
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
 

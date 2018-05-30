@@ -8,6 +8,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
+import java.util.ArrayList;
+import java.sql.ResultSet;
+
 /**
  * ユーザー情報を格納するテーブルに対しての操作処理を包括する
  * DB接続系はDBManagerクラスに一任
@@ -51,48 +54,130 @@ public class UserDataDAO {
 
     }
     
+    //DBの値を更新するメソッド
+    public void update(UserDataDTO ud) throws SQLException{
+        Connection con = null;
+        PreparedStatement st = null;
+        try{
+            con = DBManager.getConnection();
+            st = con.prepareStatement("UPDATE User_t SET name=?,birthday=?,tell=?,type=?,comment=? WHERE userID=?");
+            st.setString(1, ud.getName());
+            st.setDate(2, new java.sql.Date(ud.getBirthday().getTime()));
+            st.setString(3, ud.getTell());
+            st.setInt(4, ud.getType());
+            st.setString(5, ud.getComment());
+            st.setInt(6, ud.getUserID());
+            st.executeUpdate();
+        }catch(SQLException e){
+            throw new SQLException(e);
+        }finally{
+            if(con != null){
+                con.close();
+            }
+        }
+    }
+    
+    //DBのレコードを削除するメソッド
+    public void delete(int num) throws SQLException{
+        Connection con = null;
+        PreparedStatement st = null;
+        try{
+            con = DBManager.getConnection();
+            st = con.prepareStatement("DELETE FROM User_t WHERE UserID=?");
+            st.setInt(1,num);
+            st.executeUpdate();
+        }catch(SQLException e){
+            throw new SQLException(e);
+        }finally{
+            if(con != null){
+                con.close();
+            }
+        }
+    }
+    
     /**
      * データの検索処理を行う。
      * @param ud 対応したデータを保持しているJavaBeans
      * @throws SQLException 呼び出し元にcatchさせるためにスロー 
      * @return 検索結果
      */
-    public UserDataDTO search(UserDataDTO ud) throws SQLException{
+    //入力フォームがすべて未記入の時の処理を追加
+    //2つ以下が未記入の場合を追加
+    public ArrayList<UserDataDTO> search(UserDataDTO ud) throws SQLException{
         Connection con = null;
         PreparedStatement st = null;
         try{
             con = DBManager.getConnection();
             
-            //
-            String sql = "SELECT * FROM user_t";
+            String sql = "SELECT * FROM user_t";            
             boolean flag = false;
+            //追加
+            String check = "";
+            
             if (!ud.getName().equals("")) {
                 sql += " WHERE name like ?";
-                flag = true;
+                check += "A";
+                flag = true;                
             }
             if (ud.getBirthday()!=null) {
                 if(!flag){
                     sql += " WHERE birthday like ?";
+                    check += "B";
                     flag = true;
                 }else{
                     sql += " AND birthday like ?";
+                    check += "B";
                 }
             }
             if (ud.getType()!=0) {
                 if(!flag){
                     sql += " WHERE type like ?";
+                    check += "C";
+                    flag = true;
                 }else{
                     sql += " AND type like ?";
+                    check += "C";
                 }
             }
             st =  con.prepareStatement(sql);
-            st.setString(1, "%"+ud.getName()+"%");
-            st.setString(2, "%"+ new SimpleDateFormat("yyyy").format(ud.getBirthday())+"%");
-            st.setInt(3, ud.getType());
             
+            //もしフラグが立っていたら
+            if (flag) {
+                switch (check) {
+                    case "A":
+                        st.setString(1, "%"+ud.getName()+"%");
+                        break;
+                    case "AB":
+                        st.setString(1, "%"+ud.getName()+"%");
+                        st.setString(2, "%"+ new SimpleDateFormat("yyyy").format(ud.getBirthday())+"%");
+                        break;
+                    case "AC":                    
+                        st.setString(1, "%"+ud.getName()+"%");
+                        st.setInt(2, ud.getType());
+                        break;
+                    case "ABC":
+                        st.setString(1, "%"+ud.getName()+"%");
+                        st.setString(2, "%"+ new SimpleDateFormat("yyyy").format(ud.getBirthday())+"%");
+                        st.setInt(3, ud.getType());
+                        break;
+                    case "B":
+                        st.setString(1, "%"+ new SimpleDateFormat("yyyy").format(ud.getBirthday())+"%");
+                        break;
+                    case "BC":
+                        st.setString(1, "%"+ new SimpleDateFormat("yyyy").format(ud.getBirthday())+"%");
+                        st.setInt(2, ud.getType());
+                        break;
+                    case "C":
+                        st.setInt(1, ud.getType());
+                        break;
+                }
+            }
+            
+            //条件に合ったものを格納
             ResultSet rs = st.executeQuery();
-            rs.next();
-            UserDataDTO resultUd = new UserDataDTO();
+            ArrayList<UserDataDTO> box = new ArrayList();
+            while (rs.next()) {
+            UserDataDTO resultUd = new UserDataDTO(); 
             resultUd.setUserID(rs.getInt(1));
             resultUd.setName(rs.getString(2));
             resultUd.setBirthday(rs.getDate(3));
@@ -100,10 +185,11 @@ public class UserDataDAO {
             resultUd.setType(rs.getInt(5));
             resultUd.setComment(rs.getString(6));
             resultUd.setNewDate(rs.getTimestamp(7));
-            
+            box.add(resultUd);
+            }
             System.out.println("search completed");
 
-            return resultUd;
+            return box;
         }catch(SQLException e){
             System.out.println(e.getMessage());
             throw new SQLException(e);

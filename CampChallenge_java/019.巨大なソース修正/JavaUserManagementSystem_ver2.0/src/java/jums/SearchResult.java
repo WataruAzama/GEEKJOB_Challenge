@@ -8,6 +8,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.util.ArrayList;
+import javax.servlet.http.HttpSession;
+
 /**
  *
  * @author hayashi-s
@@ -27,21 +30,69 @@ public class SearchResult extends HttpServlet {
             throws ServletException, IOException {
         try{
             request.setCharacterEncoding("UTF-8");//リクエストパラメータの文字コードをUTF-8に変更
-        
-            //フォームからの入力を取得して、JavaBeansに格納
-            UserDataBeans udb = new UserDataBeans();
-            udb.setName(request.getParameter("name"));
-            udb.setYear(request.getParameter("year"));
-            udb.setType(request.getParameter("type"));
-
-            //DTOオブジェクトにマッピング。DB専用のパラメータに変換
-            UserDataDTO searchData = new UserDataDTO();
-            udb.UD2DTOMapping(searchData);
-
-            UserDataDTO resultData = UserDataDAO .getInstance().search(searchData);
-            request.setAttribute("resultData", resultData);
             
-            request.getRequestDispatcher("/searchresult.jsp").forward(request, response);  
+            HttpSession hs = request.getSession();
+            UserDataDTO searchData = new UserDataDTO();
+            UserDataBeans searchUDB = (UserDataBeans)hs.getAttribute("searchUDB");
+            
+            //セッション情報の有無、入力フォームからの情報の有無、それらを使用する準備。
+            String udbname = "";
+            String udbyear = "";
+            String udbtype = "";
+            if (searchUDB != null) {
+                udbname = searchUDB.getName();
+                udbyear = String.valueOf(searchUDB.getYear());
+                udbtype = String.valueOf(searchUDB.getType());
+            }
+            String strname = request.getParameter("name");
+            String stryear = request.getParameter("year");
+            String strtype = request.getParameter("type");            
+            
+            //検索情報が残ってる場合
+            if (searchUDB != null && udbname.equals(strname) && udbyear.equals(stryear) && udbtype.equals(strtype)) {
+                UserDataBeans seUDB = searchUDB;
+                seUDB.UD2DTOMapping(searchData);
+                ArrayList<UserDataDTO> resultData = UserDataDAO .getInstance().search(searchData);
+                
+                //forwardのrequestにセット
+                request.setAttribute("resultData", resultData);           
+                
+                request.getRequestDispatcher("/searchresult.jsp").forward(request, response);
+                
+            //search.jsp意外のページから飛んできた場合
+            }else if(searchUDB != null && strname==null && stryear==null && strtype==null) {
+                UserDataBeans seUDB = searchUDB;
+                seUDB.UD2DTOMapping(searchData);
+                ArrayList<UserDataDTO> resultData = UserDataDAO .getInstance().search(searchData);
+                
+                //forwardのrequestにセット
+                request.setAttribute("resultData", resultData);           
+                
+                request.getRequestDispatcher("/searchresult.jsp").forward(request, response);
+                
+            //始めて検索した場合
+            //フォームからの入力を取得して、JavaBeansに格納
+            }else{
+                UserDataBeans udb = new UserDataBeans();
+                udb.setName(request.getParameter("name"));
+                udb.setYear(request.getParameter("year"));
+                udb.setType(request.getParameter("type"));
+                //セッションに格納し、次にこの画面に来た時の処理に使用
+                hs.setAttribute("searchUDB",udb);
+                
+                //UDBを使用してDTOオブジェクトにマッピング。DB専用のパラメータに変換。上の3つ以外も格納
+                udb.UD2DTOMapping(searchData);
+
+                //DAOを使用してDBから該当データを検索(ArrayListにDTOをセット)
+                ArrayList<UserDataDTO> resultData = UserDataDAO .getInstance().search(searchData);
+                //セッションにudbをせっと
+                //forwardのrequestにセット
+                request.setAttribute("resultData", resultData);
+
+                request.getRequestDispatcher("/searchresult.jsp").forward(request, response);  
+            }
+            
+            
         }catch(Exception e){
             //何らかの理由で失敗したらエラーページにエラー文を渡して表示。想定は不正なアクセスとDBエラー
             request.setAttribute("error", e.getMessage());

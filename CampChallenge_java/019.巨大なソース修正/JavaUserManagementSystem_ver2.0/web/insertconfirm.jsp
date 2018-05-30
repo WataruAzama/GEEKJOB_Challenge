@@ -7,7 +7,6 @@
     HttpSession hs = request.getSession();
     UserDataBeans udb = (UserDataBeans)hs.getAttribute("udb");
     ArrayList<String> chkList = udb.chkproperties();
-    
 %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>

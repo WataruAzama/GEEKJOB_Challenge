@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
 /**
  * ページで入出力されるユーザー情報を持ちまわるJavaBeans。DTOと違い画面表示系への結びつきが強い
  * DTOへの変換メソッド、入力チェックリストを出力するメソッドも準備されている←ちょっと仕事しすぎかも
@@ -16,16 +19,11 @@ public class UserDataBeans implements Serializable{
     private int day;
     private String tell;
     private int type ;
-    private String comment;
+    private String comment;    
     
-    public UserDataBeans(){
-        this.name = "";
-        this.year = 0;
-        this.month = 0;
-        this.day = 0;
-        this.tell = "";
-        this.type = 0;
-        this.comment= "";
+    //インスタンスオブジェクトを返却させてコードの簡略化
+    public static UserDataBeans getInstance(){
+        return new UserDataBeans();
     }
     
     public String getName() {
@@ -135,6 +133,7 @@ public class UserDataBeans implements Serializable{
         return chkList;
     }
 
+    //フィールドの値を引数に格納
     public void UD2DTOMapping(UserDataDTO udd){
         udd.setName(this.name);
         if(this.year != 0 || this.month != 0 || this.day != 0){
@@ -151,6 +150,30 @@ public class UserDataBeans implements Serializable{
         udd.setTell(this.tell);
         udd.setType(this.type);
         udd.setComment(this.comment);
+    }
+    
+    //DTO情報をフィールドに格納して返すメソッド
+    public UserDataBeans reUDB(UserDataDTO dto) {
+        UserDataBeans udb = new UserDataBeans();
+        udb.setName(dto.getName());
+        
+        Calendar c = Calendar.getInstance();
+        Date birth = dto.getBirthday();
+        c.setTime(birth);
+        
+        String ye = String.valueOf(c.get(Calendar.YEAR));
+        udb.setYear(ye);
+        String mo = String.valueOf(c.get(Calendar.MONTH));
+        udb.setMonth(mo);
+        String da = String.valueOf(c.get(Calendar.DAY_OF_MONTH));
+        udb.setDay(da);
+        
+        udb.setTell(dto.getTell());
+        String ty = String.valueOf(dto.getType());
+        udb.setType(ty);
+        udb.setComment(dto.getComment());
+        
+        return udb;
     }
     
 }
