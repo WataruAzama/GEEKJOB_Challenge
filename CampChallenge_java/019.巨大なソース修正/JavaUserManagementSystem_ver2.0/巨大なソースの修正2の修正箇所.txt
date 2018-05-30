@@ -1,0 +1,10 @@
+1,Searchで未入力の際はSearchresultで全件表示
+2,Searchで1つでも入力されている場合は他が未入力でも検索
+3,SearchresultからSearchに戻り、値を保持しておく
+4,ヒットしない場合"該当するデータはありません"
+5,Searchresultからクリックした名前でSearchdetailに表示させる
+6,resultdetailからserchresultに"検索画面へ戻る"ボタン
+7,updateでデフォルト値
+8,updateからresultdetailに"詳細画面へ戻る"ボタン
+9,updateresultの処理
+10,deleteの処理
