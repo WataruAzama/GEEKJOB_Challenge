@@ -4,10 +4,15 @@
     Author     : Sanosuke
 --%>
 <%@page import="kagoyume.UserDataDTO"%>
-<%@page import="java.util.ArrayList"%>
+<%@page import="kagoyume.JumsHelper"%>
+<%@page import="javax.servlet.http.HttpSession"%>
 <%
-UserDataDTO user = (UserDataDTO)request.getAttribute("user");
-String newTime = (String)request.getAttribute("newTime");
+JumsHelper jh = JumsHelper.getInstance();
+HttpSession hs = request.getSession();
+String reURL = "Mydelete";
+
+UserDataDTO user = (UserDataDTO)hs.getAttribute("deleteUser");
+String newTime = (String)hs.getAttribute("deleteTime");
 %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -28,8 +33,12 @@ String newTime = (String)request.getAttribute("newTime");
             <input type="hidden" name="userID" value="<%=user.getUserID()%>">
             <input type="submit" name="btnsubmit" value="はい">
         </form>
-            <form action="top.jsp" method="POST">
-                <input type="submit" name="btnsubmit" value="トップページへ戻る">
-            </form>
     </body>
+    <%if ((String)hs.getAttribute("logPass") == null) {%>
+    <%=jh.loginPage(reURL)%>
+    <%}else{%>
+    <%=jh.logoutPage()%><br>
+    <%}%>
+    <a href="Mydata">会員情報一覧</a><br>
+    <%=jh.home()%>
 </html>

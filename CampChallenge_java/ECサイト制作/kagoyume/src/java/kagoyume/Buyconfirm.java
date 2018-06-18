@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
+import javax.servlet.http.Cookie;
 
 /**
  *
@@ -33,16 +34,25 @@ public class Buyconfirm extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            
+        try {
             
             HttpSession hs = request.getSession();
-            ArrayList<ArrayList<String>> goods = new ArrayList();
-            if ((ArrayList<ArrayList<String>>)hs.getAttribute("goods") != null) {
-                goods = (ArrayList<ArrayList<String>>)hs.getAttribute("goods");
+            
+            String check = hs.getId();
+            String sessionID = "";
+            Cookie[] cs = request.getCookies();
+            if (cs != null) {
+                for (int i=0; i<cs.length; i++) {
+                    if (cs[i].getName().equals("kagoyumeSessionID")) {
+                        sessionID = cs[i].getValue();
+                        break;
+                    }
+                }
             }
-//            セッション名はpassを追加予定
-            request.setAttribute("goods", goods);
+            
+            String userPass = (String)hs.getAttribute("logPass");
+            
+            request.setAttribute("goods", (ArrayList<ArrayList<String>>)hs.getAttribute(userPass+"goods"));
             
             request.getRequestDispatcher("/buyconfirm.jsp").forward(request, response);
         }catch(Exception e) {

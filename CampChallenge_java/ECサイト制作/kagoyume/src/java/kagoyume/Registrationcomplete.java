@@ -32,22 +32,25 @@ public class Registrationcomplete extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        try {
             
             //取得文字を変換
             request.setCharacterEncoding("UTF-8");
             HttpSession hs = request.getSession();
             
-            //udbデータをdtoに変換してdaoを使いDBに格納
-            UserDataBeans udb = (UserDataBeans)hs.getAttribute("udb");
-            UserDataDTO dto = new UserDataDTO();
-            udb.udbDTOMapping(dto);
-            UserDataDAO.getInstance().insert(dto);
+            if (request.getParameter("hidden") != null) {
+                //udbデータをdtoに変換してdaoを使いDBに格納
+                UserDataBeans udb = (UserDataBeans)hs.getAttribute("udb");
+                UserDataDTO dto = new UserDataDTO();
+                udb.udbDTOMapping(dto);
+                UserDataDAO.getInstance().insert(dto);
+
+                hs.setAttribute("resultUDB", udb);
+
+                //新規登録用のセッションの破棄
+                hs.removeAttribute("udb");
+            }
             
-            //新規登録用のセッションの破棄
-            hs.removeAttribute("udb");
-            
-            request.setAttribute("udb", udb);
             request.getRequestDispatcher("/registrationcomplete.jsp").forward(request, response);
         }catch(Exception e) {
             request.setAttribute("error", e.getMessage());

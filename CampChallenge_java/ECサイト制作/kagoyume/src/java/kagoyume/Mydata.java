@@ -14,6 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.util.ArrayList;
 import javax.servlet.http.HttpSession;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.sql.Timestamp;
 
 /**
  *
@@ -33,9 +36,16 @@ public class Mydata extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        try {
             
             ArrayList<UserDataDTO> userAl = UserDataDAO.getInstance().search();
+            //登録日時の0.x秒の表記を無くすための処理
+            ArrayList<String> dateFormat = new ArrayList();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            for (int i=0; i<userAl.size(); i++) {
+                Timestamp ts = userAl.get(i).getNewDate();
+                dateFormat.add(sdf.format(ts));
+            }
             
             HttpSession hs = request.getSession();
             hs.setAttribute("userAl", userAl);
@@ -45,7 +55,7 @@ public class Mydata extends HttpServlet {
                 String str = (String)request.getAttribute("str");
                 request.setAttribute("str", str);
             }
-            request.setAttribute("userAl", userAl);
+            request.setAttribute("dateFormat", dateFormat);
             request.getRequestDispatcher("/mydata.jsp").forward(request, response);
         }catch(Exception e) {
             request.setAttribute("error", e.getMessage());

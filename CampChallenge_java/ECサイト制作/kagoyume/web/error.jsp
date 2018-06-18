@@ -3,7 +3,9 @@
     Created on : 2018/06/10, 15:33:52
     Author     : Sanosuke
 --%>
+<%@page import="kagoyume.JumsHelper"%>
 <%
+JumsHelper jh = JumsHelper.getInstance();
 String error = (String)request.getAttribute("error");
 %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -15,6 +17,7 @@ String error = (String)request.getAttribute("error");
     </head>
     <body>
         エラーが発生しました。以下の項目を確認してください。<br>
-        <%=error%>
+        <%=error%><br>
     </body>
+    <%=jh.home()%>
 </html>

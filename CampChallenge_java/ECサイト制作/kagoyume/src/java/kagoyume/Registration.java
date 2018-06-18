@@ -30,7 +30,7 @@ public class Registration extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        try {
             
             request.getRequestDispatcher("/registration.jsp").forward(request, response);
         }catch(Exception e) {

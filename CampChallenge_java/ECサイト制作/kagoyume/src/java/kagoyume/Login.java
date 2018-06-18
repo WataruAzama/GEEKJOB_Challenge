@@ -62,23 +62,33 @@ public class Login extends HttpServlet {
                     request.getRequestDispatcher("/login.jsp").forward(request, response);
                 }
 
-                //ログインできたら以前のページに戻る、失敗した場合はとどまって文字を追加
+                //ログインできるかチェック
+                int loginUserID = 0;
                 if (bl == false) {
                     ArrayList<UserDataDTO> checkLogin = UserDataDAO.getInstance().login();
                     boolean flg = false;
                     for (int i=0; i<checkLogin.size(); i++) {
                         if (name.equals(checkLogin.get(i).getName()) && password.equals(checkLogin.get(i).getPassword())) {
+                            loginUserID = checkLogin.get(i).getUserID();
                             flg = true;
+                            break;
                         }
-                        break;
                     }
+                    //ログインに成功した時の処理
                     if (flg == true) {
                         hs.setAttribute("logPass", password);
-                        Cookie c = new Cookie("kagoyumeSession", hs.getId());
+                        hs.setAttribute("loginUserID", loginUserID);
+                        hs.setAttribute("historyUserID" ,UserDataDAO.getInstance().historyUserID(password));
+                        Cookie c = new Cookie("kagoyumeSessionID", hs.getId());
                         response.addCookie(c);
-                        //Search画面へ戻る場合の処理
-//                        request.setAttribute("retrieval", (String)hs.getAttribute("retrieval"));
-                        request.getRequestDispatcher((String)hs.getAttribute("urlData")).forward(request, response);
+                        //ログイン前のカート情報を移動
+                        if ((ArrayList<ArrayList<String>>)hs.getAttribute("goods") != null) {
+                            ArrayList<ArrayList<String>> goods = (ArrayList<ArrayList<String>>)hs.getAttribute("goods");
+                            String userPass = password;
+                            hs.setAttribute(userPass+"goods", goods);
+                        }
+                        response.sendRedirect((String)hs.getAttribute("urlData"));
+                    //ログインに失敗したためエラー文
                     }else {
                         request.setAttribute("noData", "noData");
                         request.setAttribute("loginName", name);
@@ -90,6 +100,7 @@ public class Login extends HttpServlet {
             //既にログインしている場合
             }else if ((String)hs.getAttribute("logPass") != null) {
                 //セッションの削除
+                hs.removeAttribute("goods");
                 hs.removeAttribute("logPass");
                 //クッキーの削除
                 Cookie cookies[] = request.getCookies();
@@ -103,7 +114,12 @@ public class Login extends HttpServlet {
                 
             //初めてきた場合の処理
             }else {
-                String urlData = request.getParameter("utlData");
+                String urlData = "";
+                if (request.getParameter("utlData") != null) {
+                    urlData = request.getParameter("utlData");
+                }else {
+                    urlData = (String)hs.getAttribute("urlCart");
+                }
                 hs.setAttribute("urlData", urlData);
                 request.getRequestDispatcher("/login.jsp").forward(request, response);
             }

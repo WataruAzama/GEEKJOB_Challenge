@@ -4,16 +4,21 @@
     Author     : Sanosuke
 --%>
 <%@page import="javax.servlet.http.HttpSession"%>
+<%@page import="kagoyume.JumsHelper"%>
+<%@page import="java.util.ArrayList"%>
 <%
-    String thum = (String)request.getAttribute("thum");
-    String name = (String)request.getAttribute("name");
-    String price = (String)request.getAttribute("price");
-    String headline = (String)request.getAttribute("headline");
-    String rate = (String)request.getAttribute("rate");
-    String code = (String)request.getAttribute("code");
-    
+JumsHelper jh = JumsHelper.getInstance();
 HttpSession hs = request.getSession();
-String retrieval =(String)hs.getAttribute("retrieval");
+String reURL = (String)hs.getAttribute("reItem");
+String reSearch = (String)hs.getAttribute("reSearch");
+    
+ArrayList<String> resultSource = (ArrayList<String>)request.getAttribute("resultSource");
+    String thum = resultSource.get(0);
+    String name = resultSource.get(1);
+    String price = resultSource.get(2);
+    String headline = resultSource.get(3);
+    String rate = resultSource.get(4);
+    String code = resultSource.get(5);
 %>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -36,11 +41,25 @@ String retrieval =(String)hs.getAttribute("retrieval");
         <input type="hidden" name="headline" value="<%=headline%>">
         <input type="hidden" name="rate" value="<%=rate%>">
         <input type="hidden" name="code" value="<%=code%>">
+        個数：
+        <select name="count">
+            <%for (int i=1; i<=10; i++) {%>
+            <option value="<%=i%>"><%=i%></option>
+            <%}%>
+        </select>
+            個
         <input type="submit" name="addItem" value="カートに追加する">
         </form>
-        <form action="Search" method="GET">
-            <input type="hidden" name="retrieval" value="<%=retrieval%>">
+        <form action="<%=reSearch%>" method="POST">
             <input type="submit" name="btnsubmit" value="検索結果へ戻る">
         </form>
     </body>
+    <%if ((String)hs.getAttribute("logPass") == null) {%>
+    <%=jh.loginPage(reURL)%>
+    <%}else{%>
+    <%=jh.logoutPage()%><br>
+    <a href="Myhistory">購入履歴</a><br>
+    <%}%>
+    <a href="Cart">カートを確認</a><br>
+    <%=jh.home()%>
 </html>

@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 
 /**
  *
@@ -32,22 +33,42 @@ public class Registrationconfirm extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        try {
             
             //取得文字を変換
             request.setCharacterEncoding("UTF-8");
             HttpSession hs = request.getSession();
             
             UserDataBeans udb = new UserDataBeans();
-            udb.setName(request.getParameter("newName"));
-            udb.setPassword(request.getParameter("newPass"));
-            udb.setMail(request.getParameter("newMail"));
-            udb.setAddress(request.getParameter("newAddress"));
+            if (request.getParameter("parameters") != null) {
+                udb.setName(request.getParameter("newName"));
+                udb.setPassword(request.getParameter("newPass"));
+                udb.setMail(request.getParameter("newMail"));
+                udb.setAddress(request.getParameter("newAddress"));
+            }else {
+                udb = (UserDataBeans)hs.getAttribute("udb");
+            }
             
-            hs.setAttribute("udb",udb);
-            
-            request.setAttribute("udb",udb);
-            request.getRequestDispatcher("/registrationconfirm.jsp").forward(request, response);
+            //既に登録されているパスワードかチェック
+            ArrayList<String> checkAl = UserDataDAO.getInstance().checkPassword();
+            boolean flg = false;
+            for (int i=0; i<checkAl.size(); i++) {
+                String str = checkAl.get(i);
+                if (udb.getPassword().equals(str)) {
+                    flg = true;
+                    break;
+                }
+            }
+            //フラグが立った場合エラー文を表示
+            if (flg == true) {
+                hs.setAttribute("usedPassword", "そのパスワードは使用されています。<br>");
+                response.sendRedirect("Registration");
+            //成功した場合確認画面へ
+            }else {
+                hs.setAttribute("udb",udb);
+
+                request.getRequestDispatcher("/registrationconfirm.jsp").forward(request, response);
+            }
         }catch(Exception e) {
             request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/error.jsp").forward(request, response);

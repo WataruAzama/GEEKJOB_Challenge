@@ -4,8 +4,14 @@
     Author     : Sanosuke
 --%>
 <%@page import="kagoyume.UserDataBeans"%>
+<%@page import="kagoyume.JumsHelper"%>
+<%@page import="javax.servlet.http.HttpSession"%>
 <%
-UserDataBeans udb = (UserDataBeans)request.getAttribute("userUDB");
+JumsHelper jh = JumsHelper.getInstance();
+HttpSession hs = request.getSession();
+String reURL = "Myupdate";
+
+UserDataBeans udb = (UserDataBeans)hs.getAttribute("userUDB");
 int userID = (Integer)request.getAttribute("userID");
 String str = "";
 if ((String)request.getAttribute("str") != null) {
@@ -37,4 +43,11 @@ if ((String)request.getAttribute("str") != null) {
         <%=str%>
         <%}%>
     </body>
+    <%if ((String)hs.getAttribute("logPass") == null) {%>
+    <%=jh.loginPage(reURL)%>
+    <%}else{%>
+    <%=jh.logoutPage()%>
+    <%}%><br>
+    <a href="Mydata">会員情報一覧</a><br>
+    <%=jh.home()%>
 </html>

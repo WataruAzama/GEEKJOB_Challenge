@@ -5,18 +5,17 @@
 --%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="kagoyume.JumsHelper"%>
-
+<%@page import="javax.servlet.http.HttpSession"%>
 <%
 JumsHelper jh = JumsHelper.getInstance();
 HttpSession hs = request.getSession();
+String reURL = (String)hs.getAttribute("reSearch");
     
-    String retrieval = (String)request.getAttribute("retrieval");
+    String retrieval = (String)hs.getAttribute("retrieval");
     String eRoot = (String)request.getAttribute("eRoot");
     ArrayList<String> thum = (ArrayList<String>)request.getAttribute("thum");
     ArrayList<String> name = (ArrayList<String>)request.getAttribute("name");
     ArrayList<String> price = (ArrayList<String>)request.getAttribute("price");
-    ArrayList<String> headline = (ArrayList<String>)request.getAttribute("headline");
-    ArrayList<String> rate = (ArrayList<String>)request.getAttribute("rate");
     ArrayList<String> code = (ArrayList<String>)request.getAttribute("code");
 %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -39,14 +38,9 @@ HttpSession hs = request.getSession();
             <tr>
                 <th><img src="<%=thum.get(i)%>"></th>
                 <th><%=name.get(i)%>
-                    <form action="Item" method="POST">
-                        <input type="hidden" name="thum" value="<%=thum.get(i)%>">
-                        <input type="hidden" name="name" value="<%=name.get(i)%>">
-                        <input type="hidden" name="price" value="<%=price.get(i)%>">
-                        <input type="hidden" name="headline" value="<%=headline.get(i)%>">
-                        <input type="hidden" name="rate" value="<%=rate.get(i)%>">
+                    <form action="Item" method="GET">
                         <input type="hidden" name="code" value="<%=code.get(i)%>">
-                        <input type="submit" name="btnsubmit" value="詳細へ">
+                        <input type="submit" name="btnsubmit" value="商品詳細">
                     </form>
                 </th>
                 <th><%=price.get(i)%>円</th>
@@ -55,9 +49,11 @@ HttpSession hs = request.getSession();
         </table>
     </body>
     <%if ((String)hs.getAttribute("logPass") == null) {%>
-    <%=jh.loginPage("Search")%>
+    <%=jh.loginPage(reURL)%>
     <%}else{%>
-    <%=jh.logoutPage()%>
-    <%}%><br>
+    <%=jh.logoutPage()%><br>
+    <a href="Myhistory">購入履歴</a><br>
+    <%}%>
+    <a href="Cart">カートを確認</a><br>
     <%=jh.home()%>
 </html>

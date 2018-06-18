@@ -34,43 +34,50 @@ public class Myupdateresult extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        try {
             
             //文字を適切に受け取り
             request.setCharacterEncoding("UTF-8");
             HttpSession hs = request.getSession();
             
-            //変更前の情報を取得
-            UserDataBeans checkUDB = (UserDataBeans)hs.getAttribute("userUDB");
-            
-            //更新予定の値を取得
-            UserDataBeans user = new UserDataBeans();
-            user.setName(request.getParameter("upName"));
-            user.setPassword(request.getParameter("upPass"));
-            user.setMail(request.getParameter("upMail"));
-            user.setAddress(request.getParameter("upAddress"));
-            
-            //空文字があったらエラー
-            ArrayList<String> checkList = user.checkList();
-            if (checkList.size() != 0) {
-                String str = JumsHelper.getInstance().checkInput(checkList);
-                request.setAttribute("str", str);
-                
-                request.getRequestDispatcher("/Myupdate").forward(request, response);
-            }else if(checkUDB.checkUpdate(user) == true) {
-                String str = "情報が変更されていません。";
-                request.setAttribute("str", str);
-                
-                RequestDispatcher rd = request.getRequestDispatcher("/Myupdate");
-                rd.forward(request, response);
-            }else {
-                UserDataDTO dto = new UserDataDTO();
-                user.udbDTOMapping(dto);
-                dto.setUserID(Integer.parseInt(request.getParameter("userID")));
+            //入力フォームから来た場合
+            if (request.getParameter("upName") != null) {
+                //変更前の情報を取得
+                UserDataBeans checkUDB = (UserDataBeans)hs.getAttribute("userUDB");
 
-                UserDataDAO.getInstance().update(dto);
+                //更新予定の値を取得
+                UserDataBeans user = new UserDataBeans();
+                user.setName(request.getParameter("upName"));
+                user.setPassword(request.getParameter("upPass"));
+                user.setMail(request.getParameter("upMail"));
+                user.setAddress(request.getParameter("upAddress"));
+
+                //空文字があったらエラー
+                ArrayList<String> checkList = user.checkList();
+                if (checkList.size() != 0) {
+                    String str = JumsHelper.getInstance().checkInput(checkList);
+                    request.setAttribute("str", str);
+
+                    request.getRequestDispatcher("/Myupdate").forward(request, response);
+                }else if(checkUDB.checkUpdate(user) == true) {
+                    String str = "情報が変更されていません。";
+                    request.setAttribute("str", str);
+
+                    RequestDispatcher rd = request.getRequestDispatcher("/Myupdate");
+                    rd.forward(request, response);
+                }else {
+                    UserDataDTO dto = new UserDataDTO();
+                    user.udbDTOMapping(dto);
+                    dto.setUserID(Integer.parseInt(request.getParameter("userID")));
+
+                    UserDataDAO.getInstance().update(dto);
+
+                    hs.setAttribute("resultUpdateUDB", user);
+                    request.getRequestDispatcher("/myupdateresult.jsp").forward(request, response);
+                }
                 
-                request.setAttribute("user", user);
+            //ログインから来た場合
+            }else {
                 request.getRequestDispatcher("/myupdateresult.jsp").forward(request, response);
             }
             

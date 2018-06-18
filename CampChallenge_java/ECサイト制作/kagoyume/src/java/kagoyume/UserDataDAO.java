@@ -127,14 +127,15 @@ public class UserDataDAO {
         try {
             ArrayList<UserDataDTO> box = new ArrayList();
             con = DBManager.getConnection();
-            String sql = "SELECT name,password FROM user_t WHERE deleteFlg = ?";
+            String sql = "SELECT userID,name,password FROM user_t WHERE deleteFlg = ?";
             st = con.prepareStatement(sql);
             st.setInt(1, 0);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 UserDataDTO dto = new UserDataDTO();
-                dto.setName(rs.getString(1));
-                dto.setPassword(rs.getString(2));
+                dto.setUserID(rs.getInt(1));
+                dto.setName(rs.getString(2));
+                dto.setPassword(rs.getString(3));
                 box.add(dto);
             }
         return box;
@@ -142,6 +143,124 @@ public class UserDataDAO {
             throw new SQLException(e);
         }finally {
             if (con != null) {
+                con.close();
+            }
+        }
+    }
+    
+    public void buyInsert(int userNum, int typeNum, ArrayList<ArrayList<String>> goods) throws SQLException {
+        Connection con = null;
+        PreparedStatement st = null;
+        try {
+            con = DBManager.getConnection();
+            st = con.prepareStatement("INSERT INTO buy_t(userID,itemCode,type,buyDate) VALUES(?,?,?,?)");
+            for (int i=0; i<goods.size(); i++) {
+                st.setInt(1, userNum);
+                st.setString(2, goods.get(i).get(5));
+                st.setInt(3, typeNum);
+                st.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+                st.executeUpdate();
+            }
+        }catch(SQLException e) {
+            throw new SQLException(e);
+        }finally {
+            if (con != null) {
+                con.close();
+            }
+        }
+    }
+    
+    public void buyUpdate(int userNum,int money) throws SQLException {
+        Connection con = null;
+        PreparedStatement st = null;
+        try {
+            //これまでの購入金額を取得
+            con = DBManager.getConnection();
+            st = con.prepareStatement("SELECT total FROM user_t WHERE userID=?");
+            st.setInt(1, userNum);
+            ResultSet rs = st.executeQuery();
+            int numTotal = 0;
+            while (rs.next()) {
+                numTotal = rs.getInt(1);
+                numTotal += money;
+            }
+            //今回購入した金額をプラス
+            st = con.prepareStatement("UPDATE user_t SET total=? WHERE userID=?");
+            st.setInt(1, numTotal);
+            st.setInt(2, userNum);
+            st.executeUpdate();
+        }catch(SQLException e) {
+            throw new SQLException(e);
+        }finally {
+            if (con != null) {
+                con.close();
+            }
+        }
+    }
+    
+    public ArrayList<String> historySearch(int userID) throws SQLException {
+        ArrayList<String> productCords = new ArrayList();
+        Connection con = null;
+        PreparedStatement st = null;
+        try {
+            con = DBManager.getConnection();
+            String sql = "SELECT itemCode FROM buy_t WHERE userID = ?";
+            st = con.prepareStatement(sql);
+            st.setInt(1, userID);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                productCords.add(rs.getString(1));
+            }
+            return productCords;
+        }catch(SQLException e) {
+            throw new SQLException(e);
+        }finally{
+            if(con != null) {
+                con.close();
+            }
+        }
+    }
+    
+    public Integer historyUserID(String str) throws SQLException {
+        int num = 0;
+        Connection con = null;
+        PreparedStatement st = null;
+        try {
+            con = DBManager.getConnection();
+            st = con.prepareStatement("SELECT userID FROM user_t WHERE password=? AND deleteFlg=?");
+            st.setString(1, str);
+            st.setInt(2, 0);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                num = rs.getInt(1);
+            }
+            return num;
+        }catch(SQLException e) {
+            throw new SQLException(e);
+        }finally{
+            if(con != null) {
+                con.close();
+            }
+        }
+    }
+    
+    public ArrayList<String> checkPassword() throws SQLException {
+        ArrayList<String> alPassword = new ArrayList();
+        Connection con = null;
+        PreparedStatement st = null;
+        try {
+            con = DBManager.getConnection();
+            st = con.prepareStatement("SELECT password FROM user_t WHERE deleteFlg=?");
+            st.setInt(1,0);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                alPassword.add(rs.getString(1));
+            }
+            return alPassword;
+        }catch(SQLException e) {
+            throw new SQLException(e);
+        }finally{
+            if(con != null) {
                 con.close();
             }
         }

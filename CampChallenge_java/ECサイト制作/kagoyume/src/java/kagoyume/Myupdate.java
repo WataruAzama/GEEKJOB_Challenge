@@ -33,7 +33,7 @@ public class Myupdate extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        try {
             
             //文字を適切に受け取り
             request.setCharacterEncoding("UTF-8");
@@ -59,7 +59,6 @@ public class Myupdate extends HttpServlet {
             
             hs.setAttribute("userUDB", userUDB);
             request.setAttribute("userID", user.getUserID());
-            request.setAttribute("userUDB", userUDB);
             request.getRequestDispatcher("/myupdate.jsp").forward(request, response);
         }catch(Exception e) {
             request.setAttribute("error", e.getMessage());

@@ -5,9 +5,11 @@
 --%>
 <%@page import="kagoyume.JumsHelper"%>
 <%@page import="javax.servlet.http.HttpSession"%>
+<%@page import="javax.servlet.http.HttpServletRequest;"%>
 <%
 JumsHelper jh = JumsHelper.getInstance();
 HttpSession hs = request.getSession();
+String reURL = request.getRequestURL()+"";
 String errorStr = "";
 if ((String)request.getAttribute("errorStr") != null) {
     errorStr = (String)request.getAttribute("errorStr");
@@ -31,9 +33,11 @@ if ((String)request.getAttribute("errorStr") != null) {
         <%}%>
     </body>
     <%if ((String)hs.getAttribute("logPass") == null) {%>
-    <%=jh.loginPage("top.jsp")%>
+    <%=jh.loginPage(reURL)%>
     <%}else{%>
-    <%=jh.logoutPage()%>
+    <%=jh.logoutPage()%><br>
+    <a href="Myhistory">購入履歴</a><br>
     <%}%>
-    <a href="Mydata">会員情報一覧</a>
+    <a href="Mydata">会員情報一覧</a><br>
+    <a href="Cart">カートを確認</a><br>
 </html>

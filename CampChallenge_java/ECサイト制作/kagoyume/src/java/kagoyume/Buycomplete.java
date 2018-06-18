@@ -12,6 +12,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+
 /**
  *
  * @author Sanosuke
@@ -30,13 +34,50 @@ public class Buycomplete extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        try {
             
             //受け取りの文字指定
             request.setCharacterEncoding("UTF-8");
+            HttpSession hs = request.getSession();
+            String userPass = (String)hs.getAttribute("logPass");
+            String userStr = (String)hs.getAttribute("logPass");
+            int userNum = (Integer)hs.getAttribute("loginUserID");
+            int typeNum = Integer.parseInt(request.getParameter("delivery"));
+            int money = Integer.parseInt(request.getParameter("money"));
+            ArrayList<ArrayList<String>> goods = (ArrayList<ArrayList<String>>)hs.getAttribute(userStr+"goods");
             
+            //複数購入の商品を単品ずつに分ける処理
+            ArrayList<ArrayList<String>> buyGoods = new ArrayList();
+            for (int i=0; i<goods.size(); i++) {
+                int count = Integer.parseInt(goods.get(i).get(7));
+                for (int k=0; k<count; k++) {
+                    buyGoods.add(goods.get(i));
+                }
+            }
             
-            
+            //セッションIDのチェック
+            String check = hs.getId();
+            String sessionID = "";
+            Cookie[] cs = request.getCookies();
+            if (cs != null) {
+                for (int i=0; i<cs.length; i++) {
+                    if (cs[i].getName().equals("kagoyumeSessionID")) {
+                        sessionID = cs[i].getValue();
+                        break;
+                    }
+                }
+            }
+            if (check.equals(sessionID)) {
+                //DBに格納
+                UserDataDAO.getInstance().buyInsert(userNum, typeNum, buyGoods);
+                //購入ユーザーの総購入金額の更新
+                UserDataDAO.getInstance().buyUpdate(userNum, money);
+                //カートの中身を削除
+                hs.removeAttribute(userPass+"goods");
+            }else {
+                throw new Exception("セッションの有効期限が切れました。<br>"
+                        + "ログイン状態が続いている場合は一度ログアウトしてください。");
+            }
             
             request.getRequestDispatcher("/buycomplete.jsp").forward(request, response);
         }catch(Exception e) {

@@ -30,12 +30,12 @@ public class JumsHelper {
     private final String loginURL = "Login";
     public String loginPage(String str) {
         return "<form action=\""+this.loginURL+"\" method=\"POST\">"
-                + "<input type=\"hidden\" name=\"utlData\" value=\"/"+str+"\">"
-                + "<input type=\"submit\" name=\"btnsubmit\" value=\"ログイン画面へ\">"
+                + "<input type=\"hidden\" name=\"utlData\" value=\""+str+"\">"
+                + "<input type=\"submit\" name=\"btnsubmit\" value=\"ログイン画面\">"
                 + "</form>";
     }
     public String logoutPage() {
-        return "<a href=\""+loginURL+"\">ログアウト画面へ</a>";
+        return "<a href=\""+loginURL+"\">ログアウト</a>";
     }
     
     public String checkInput(ArrayList<String> checkList) {

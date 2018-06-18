@@ -79,7 +79,7 @@ public class Search extends HttpServlet {
             String retrieval = "";
             
             //ログイン画面から戻ってきた場合の処理
-            if ((String)hs.getAttribute("retrieval") != null) {
+            if ((String)hs.getAttribute("reSearch") != null && request.getParameter("retrieval") == null) {
                 retrieval = (String)hs.getAttribute("retrieval");
             //値が空文字の場合エラー
             }else if (request.getParameter("retrieval").trim().equals("")) {
@@ -91,15 +91,16 @@ public class Search extends HttpServlet {
             if (retrieval.equals("")) {
                 retrieval = request.getParameter("retrieval");
             }
-
-            //ここに書いていいか分からん、str2を作った下？
+            //検索ワードを他ページでも使えるようにセッションに格納
             hs.setAttribute("retrieval", retrieval);
-
-
             //日本語を検索やクッキー用の文字列に変換
             String str2 = URLEncoder.encode(retrieval,"UTF-8");
             String str3 = "&hits=10";
             URL url = new URL(str+str2+str3);
+            
+            //ログイン等から戻ってくるための準備
+            String strURL = request.getRequestURL()+"?retrieval="+str2+"&btnsubmit=%E6%A4%9C%E7%B4%A2";
+            hs.setAttribute("reSearch", strURL);
 
             URLConnection con = url.openConnection();
             InputStream is = con.getInputStream();
@@ -126,6 +127,8 @@ public class Search extends HttpServlet {
             NodeList localNodeList = elementRoot.getElementsByTagName("Hit");
             //XMLから要素を抜き取る自作関数
             CommonFunc common = new CommonFunc();
+            
+            ArrayList<ArrayList<String>> resultGoods = new ArrayList();
             //サムネイルを取得
             ArrayList<String> thum = new ArrayList();
             for (int i=0; i<localNodeList.getLength(); i++) {
@@ -174,19 +177,24 @@ public class Search extends HttpServlet {
                 String s = common.searchXmlValue(elementName, 0, elementItem);
                 code.add(s);
             }
-
+            
+            //検索結果を持ちまわる
+            resultGoods.add(thum);
+            resultGoods.add(name);
+            resultGoods.add(price);
+            resultGoods.add(headline);
+            resultGoods.add(rate);
+            resultGoods.add(code);
+            hs.setAttribute("resultGoods", resultGoods);
+            
             //jspに送るデータ
-            request.setAttribute("retrieval", retrieval);
             request.setAttribute("eRoot", eRoot);
             request.setAttribute("thum", thum);
             request.setAttribute("name", name);
             request.setAttribute("price", price);
-            request.setAttribute("headline", headline);
-            request.setAttribute("rate", rate);
             request.setAttribute("code", code);
-
-            request.getRequestDispatcher("/search.jsp").forward(request, response);
             
+            request.getRequestDispatcher("/search.jsp").forward(request, response);
         }catch(Exception e) {
             request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/error.jsp").forward(request, response);

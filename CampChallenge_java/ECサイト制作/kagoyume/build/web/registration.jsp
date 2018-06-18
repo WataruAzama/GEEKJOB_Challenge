@@ -5,8 +5,13 @@
 --%>
 <%@page import="kagoyume.UserDataBeans"%>
 <%@page import="javax.servlet.http.HttpSession"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="kagoyume.JumsHelper"%>
 <%
+JumsHelper jh = JumsHelper.getInstance();
 HttpSession hs = request.getSession();
+String reURL = "Registration";
+
 UserDataBeans udb = new UserDataBeans();
 if ((UserDataBeans)hs.getAttribute("udb") != null) {
     udb = (UserDataBeans)hs.getAttribute("udb");
@@ -29,7 +34,17 @@ if ((UserDataBeans)hs.getAttribute("udb") != null) {
         <input type="text" name="newMail" value="<%=udb.getMail()%>"><br>
         住所：<br>
         <input type="text" name="newAddress" value="<%=udb.getAddress()%>"><br>
+        <%if ((String)hs.getAttribute("usedPassword") != null) {%>
+        <%=(String)hs.getAttribute("usedPassword")%>
+        <%}%>
+        <input type="hidden" name="parameters" value="parameters">
         <input type="submit" name="btnsubmit" value="確認フォームへ">
         </form>
     </body>
+    <%if ((String)hs.getAttribute("logPass") == null) {%>
+    <%=jh.loginPage(reURL)%>
+    <%}else{%>
+    <%=jh.logoutPage()%>
+    <%}%><br>
+    <%=jh.home()%>
 </html>

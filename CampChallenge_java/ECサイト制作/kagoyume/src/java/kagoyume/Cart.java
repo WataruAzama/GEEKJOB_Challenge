@@ -33,17 +33,70 @@ public class Cart extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        try {
             
             HttpSession hs = request.getSession();
             ArrayList<ArrayList<String>> goods = new ArrayList();
-            if ((ArrayList<ArrayList<String>>)hs.getAttribute("goods") != null) {
-                goods = (ArrayList<ArrayList<String>>)hs.getAttribute("goods");
-            }
-//            セッション名はpassを追加予定
-            request.setAttribute("goods", goods);
+            String userPass = "check";
+            boolean flg = false;
             
-            request.getRequestDispatcher("/cart.jsp").forward(request, response);
+            //ログインせずにここに来た場合
+            if ((String)hs.getAttribute("logPass") == null) {
+                hs.setAttribute("urlCart", "Cart");
+                response.sendRedirect("Login");
+            //ログインしてきた場合
+            }else {
+                userPass = (String)hs.getAttribute("logPass");
+                flg = true;
+            }
+            //ログイン前にカートに追加していた場合と、ログイン後にカートに追加した場合の処理
+            if (flg == true) {
+                if (request.getParameter("delete") == null) {
+                    if ((ArrayList<ArrayList<String>>)hs.getAttribute("checkgoods") != null) {
+                        //ログイン前にカートに追加していて、ログイン後そのアカウントにもカートに商品があった場合
+                        if ((ArrayList<ArrayList<String>>)hs.getAttribute(userPass+"goods") != null) {
+                            goods = (ArrayList<ArrayList<String>>)hs.getAttribute(userPass+"goods");
+                            ArrayList<ArrayList<String>> nGoods = (ArrayList<ArrayList<String>>)hs.getAttribute("checkgoods");
+                            for (int i=0; i<nGoods.size(); i++) {
+                                goods.add(nGoods.get(i));
+                                hs.removeAttribute("checkgoods");
+                            }
+                        //ログイン前にカートに追加していて、ログイン後にそのアカウントのカートに商品がなかった場合
+                        }else {
+                            goods = (ArrayList<ArrayList<String>>)hs.getAttribute("checkgoods");
+                            hs.removeAttribute("checkgoods");
+                        }
+                    //ログイン前にカートに追加していない場合
+                    }else {
+                        goods = (ArrayList<ArrayList<String>>)hs.getAttribute(userPass+"goods");
+                    }
+                    
+                    //上記の処理を終えセッションに格納、jspへ飛ぶ
+                    hs.setAttribute(userPass+"goods", goods);
+                    request.getRequestDispatcher("/cart.jsp").forward(request, response);
+                    
+                    
+                //削除ボタンを押された場合
+                }else {
+                    int num = Integer.parseInt(request.getParameter("delete"));
+                    int deleteCount = Integer.parseInt(request.getParameter("deleteCount"));
+                    goods = (ArrayList<ArrayList<String>>)hs.getAttribute(userPass+"goods");
+                    int goodsCount = Integer.parseInt(goods.get(num).get(7));
+                    //削除の個数分減らす
+                    goodsCount -= deleteCount;
+                    //個数が0になったら商品を消去
+                    if (goodsCount == 0) {
+                    goods.remove(num);
+                    //商品が残ってる場合は改めて格納
+                    }else {
+                        String newGoodsCount = String.valueOf(goodsCount);
+                        goods.get(num).set(7, newGoodsCount);
+                    }
+                    hs.setAttribute(userPass+"goods", goods);
+
+                    request.getRequestDispatcher("/cart.jsp").forward(request, response);
+                }
+            }
         }catch(Exception e) {
             request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/error.jsp").forward(request, response);

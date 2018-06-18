@@ -47,6 +47,7 @@ if ((String)request.getAttribute("loginPassword") != null) {
         名前またはパスワードが違います。<br>
         <%}%>
         <a href="Registration">新規会員登録</a>
+        <a href="Mydata">会員情報一覧</a>
     </body>
     <%=jh.home()%>
 </html>

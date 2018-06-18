@@ -34,7 +34,7 @@ public class Add extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        try {
             
             //リクエストパラメータの文字コードをUTF-8に変更
             request.setCharacterEncoding("UTF-8");
@@ -42,20 +42,28 @@ public class Add extends HttpServlet {
             HttpSession hs = request.getSession();
             //購入予定商品をまとめるアレイリスト
             ArrayList<ArrayList<String>> goods = new ArrayList();
-//            セッション名はpassを追加予定
-            if ((ArrayList<ArrayList<String>>)hs.getAttribute("goods") !=null) {
-                goods = (ArrayList<ArrayList<String>>)hs.getAttribute("goods");
+            //セッション名はpassも追加
+            String userPass = "check";
+            if ((String)hs.getAttribute("logPass") != null) {
+                userPass = (String)hs.getAttribute("logPass");
             }
-            ArrayList<String> al = new ArrayList();
-            al.add(request.getParameter("thum"));
-            al.add(request.getParameter("name"));
-            al.add(request.getParameter("price"));
-            al.add(request.getParameter("headline"));
-            al.add(request.getParameter("rate"));
-            al.add(request.getParameter("code"));
-            goods.add(al);
-//            セッション名はpassを追加予定
-            hs.setAttribute("goods", goods);
+            if ((ArrayList<ArrayList<String>>)hs.getAttribute(userPass+"goods") !=null) {
+                goods = (ArrayList<ArrayList<String>>)hs.getAttribute(userPass+"goods");
+            }
+            if (request.getParameter("thum") != null) {
+                ArrayList<String> al = new ArrayList();
+                al.add(request.getParameter("thum"));
+                al.add(request.getParameter("name"));
+                al.add(request.getParameter("price"));
+                al.add(request.getParameter("headline"));
+                al.add(request.getParameter("rate"));
+                al.add(request.getParameter("code"));
+                al.add((String)hs.getAttribute("reItem"));
+                al.add(request.getParameter("count"));
+                goods.add(al);
+            }
+            
+            hs.setAttribute(userPass+"goods", goods);
             
             request.getRequestDispatcher("/add.jsp").forward(request, response);
         }catch(Exception e) {

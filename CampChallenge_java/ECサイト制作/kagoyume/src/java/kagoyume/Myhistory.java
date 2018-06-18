@@ -30,29 +30,29 @@ import javax.servlet.http.HttpSession;
  *
  * @author Sanosuke
  */
-public class Item extends HttpServlet {
+public class Myhistory extends HttpServlet {
 
-    public String searchXmlValue(String[] targetNodeName, int nodeNo, Node node) {
+    String searchXmlValue(String[] targetNodeName, int nodeNo, Node node) {
         try {
-            String s = "取得失敗";
+            String s = null;
             //ノードか探索範囲がnullなら再帰から抜ける。
             if(node.getNodeName() == null)return s;
             if(targetNodeName[nodeNo] == null)return s;
             //兄弟ノードを走査する。
-            for (Node ch = node.getFirstChild(); ch != null; ch = ch.getNextSibling()) {
+            for (Node ch=node.getFirstChild(); ch!=null; ch=ch.getNextSibling()) {
                 //ターゲットと一致したら値を抜いてみる
                 if (targetNodeName[nodeNo].equals(ch.getNodeName())) {
                     s = ch.getFirstChild().getNodeValue();
                     //もし値がnullで帰ってきたら子ノードありという事で再帰
-                    if(s == null){
-                        s = searchXmlValue(targetNodeName, nodeNo + 1, ch);
+                    if (s == null) {
+                        s = searchXmlValue(targetNodeName, nodeNo+1, ch);
                     }
                     break;
                 }
             }
             return s;
-        }catch (Exception e){
-            return "取得失敗";
+        }catch (Exception e) {
+            return "情報なし";
         }
     }
     
@@ -73,41 +73,26 @@ public class Item extends HttpServlet {
             //リクエストパラメータの文字コードをUTF-8に変更
             request.setCharacterEncoding("UTF-8");
             HttpSession hs = request.getSession();
-            
-            
-            String code = request.getParameter("code");
-            ArrayList<ArrayList<String>> resultGoods = (ArrayList<ArrayList<String>>)hs.getAttribute("resultGoods");
-            
-            ArrayList<String> resultSource = new ArrayList();
-            for (int i=0; i<resultGoods.get(5).size(); i++) {
-                if (code.equals(resultGoods.get(5).get(i))) {
-                    resultSource.add(resultGoods.get(0).get(i));
-                    resultSource.add(resultGoods.get(1).get(i));
-                    resultSource.add(resultGoods.get(2).get(i));
-                    resultSource.add(resultGoods.get(3).get(i));
-                    resultSource.add(resultGoods.get(4).get(i));
-                    resultSource.add(resultGoods.get(5).get(i));
-                    break;
-                }
+            int userID = 0;
+            if (request.getParameter("userID") != null) {
+                userID = Integer.parseInt(request.getParameter("userID"));
+                hs.setAttribute("historyUserID", userID);
+            }else {
+                userID = (Integer)hs.getAttribute("historyUserID");
             }
             
-            if (resultSource.size() != 0) {
-                String strURL = request.getRequestURL()+"?code="+code+"&btnsubmit=%E8%A9%B3%E7%B4%B0%E3%81%B8";
-                hs.setAttribute("reItem", strURL);
-
-                request.setAttribute("resultSource", resultSource);
-                request.setAttribute("code", code);
-
-                request.getRequestDispatcher("/item.jsp").forward(request, response);
-            //上記で上手取得できなかった場合
-            }else {
+            ArrayList<String> productCode = UserDataDAO.getInstance().historySearch(userID);
             
             //URL接続
             String str = "https://shopping.yahooapis.jp/ShoppingWebService/V1/itemLookup?appid=dj00aiZpPXRvUk1TSW9IREs0NyZzPWNvbnN1bWVyc2VjcmV0Jng9MTI-&itemcode=";
             
-            String str2 = code;
-            
-            URL url = new URL(str+str2);
+            String str2 = "";
+            ArrayList<ArrayList<String>> goodsReview = new ArrayList();
+            //このfor文で一つの商品情報を取り出せる。
+            for (int i=0; i<productCode.size(); i++) {
+                str2 = productCode.get(i);
+                
+                URL url = new URL(str+str2);
                 URLConnection con = url.openConnection();
                 InputStream is = con.getInputStream();
                 
@@ -153,34 +138,14 @@ public class Item extends HttpServlet {
                     String s = searchXmlValue(elementName, 0, elementItem);
                     price = s;
                 }
-                //キャッチコピーを取得
-                String headline = "";
-                for (int i=0; i<localNodeList.getLength(); i++) {
-                    Element elementItem = (Element)localNodeList.item(i);
-                    String elementName[] = {"Headline"};
-                    String s = searchXmlValue(elementName, 0, elementItem);
-                    headline = s;
-                }
-                //評価値を取得
-                String rate = "";
-                for (int i=0; i<localNodeList.getLength(); i++) {
-                    Element elementItem = (Element)localNodeList.item(i);
-                    String elementName[] = {"Review","Rate"};
-                    String s = searchXmlValue(elementName, 0, elementItem);
-                    rate = s;
-                }
-                resultSource.add(thum);
-                resultSource.add(name);
-                resultSource.add(price);
-                resultSource.add(headline);
-                resultSource.add(rate);
-                resultSource.add(code);
-            
-                request.setAttribute("resultSource", resultSource);
-                request.setAttribute("code", code);
-
-                request.getRequestDispatcher("/item.jsp").forward(request, response);
+                productReview.add(thum);
+                productReview.add(name);
+                productReview.add(price);
+                goodsReview.add(productReview);
             }
+            
+            request.setAttribute("goodsReview", goodsReview);
+            request.getRequestDispatcher("/myhistory.jsp").forward(request, response);
         }catch(Exception e) {
             request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/error.jsp").forward(request, response);

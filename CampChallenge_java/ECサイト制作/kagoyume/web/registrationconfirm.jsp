@@ -6,10 +6,13 @@
 <%@page import="kagoyume.UserDataBeans"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="kagoyume.JumsHelper"%>
-
+<%@page import="javax.servlet.http.HttpSession"%>
 <%
 JumsHelper jh = JumsHelper.getInstance();
-UserDataBeans udb = (UserDataBeans)request.getAttribute("udb");
+HttpSession hs = request.getSession();
+String reURL = "Registrationconfirm";
+
+UserDataBeans udb = (UserDataBeans)hs.getAttribute("udb");
 ArrayList<String> checkList = udb.checkList();
 %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -27,6 +30,7 @@ ArrayList<String> checkList = udb.checkList();
                 メール：<%=udb.getMail()%><br>
                 住所：<%=udb.getAddress()%><br>
                 上記の内容で登録いたします。よろしいですか？<br>
+                <input type="hidden" name="hidden" value="hidden">
                 <input type="submit" name="btnsubmit" value="はい">
             </form>
             <form action="Registration" method="POST">
@@ -40,4 +44,10 @@ ArrayList<String> checkList = udb.checkList();
         </form>
         <%}%>
     </body>
+    <%if ((String)hs.getAttribute("logPass") == null) {%>
+    <%=jh.loginPage(reURL)%>
+    <%}else{%>
+    <%=jh.logoutPage()%>
+    <%}%><br>
+    <%=jh.home()%>
 </html>

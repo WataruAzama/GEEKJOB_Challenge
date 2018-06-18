@@ -35,21 +35,24 @@ public class Mydelete extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        try {
             
             //取得文字を変換
             request.setCharacterEncoding("UTF-8");
-            
             HttpSession hs = request.getSession();
-            ArrayList<UserDataDTO> userAl = (ArrayList<UserDataDTO>)hs.getAttribute("userAl");
-            UserDataDTO user = userAl.get(Integer.parseInt(request.getParameter("alNum")));
             
-            //0.x秒の表記を無くす処理
-            Date dt = user.getNewDate();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-            request.setAttribute("newTime", sdf.format(dt));
+            if (request.getParameter("alNum") != null) {
+                ArrayList<UserDataDTO> userAl = (ArrayList<UserDataDTO>)hs.getAttribute("userAl");
+                UserDataDTO user = userAl.get(Integer.parseInt(request.getParameter("alNum")));
+
+                //0.x秒の表記を無くす処理
+                Date dt = user.getNewDate();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                hs.setAttribute("deleteTime", sdf.format(dt));
+
+                hs.setAttribute("deleteUser", user);
+            }
             
-            request.setAttribute("user", user);
             request.getRequestDispatcher("/mydelete.jsp").forward(request, response);
         }catch(Exception e) {
             request.setAttribute("error", e.getMessage());

@@ -4,8 +4,14 @@
     Author     : Sanosuke
 --%>
 <%@page import="kagoyume.UserDataBeans"%>
+<%@page import="kagoyume.JumsHelper"%>
+<%@page import="javax.servlet.http.HttpSession"%>
 <%
-UserDataBeans udb = (UserDataBeans)request.getAttribute("udb");
+JumsHelper jh = JumsHelper.getInstance();
+HttpSession hs = request.getSession();
+String reURL = "Registrationcomplete";
+
+UserDataBeans udb = (UserDataBeans)hs.getAttribute("resultUDB");
 %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -19,6 +25,12 @@ UserDataBeans udb = (UserDataBeans)request.getAttribute("udb");
         パスワード：<%=udb.getPassword()%><br>
         メール：<%=udb.getMail()%><br>
         住所：<%=udb.getAddress()%><br>
-        以上の内容で登録しました。
+        以上の内容で登録しました。<br>
     </body>
+    <%if ((String)hs.getAttribute("logPass") == null) {%>
+    <%=jh.loginPage(reURL)%>
+    <%}else{%>
+    <%=jh.logoutPage()%>
+    <%}%><br>
+    <%=jh.home()%>
 </html>

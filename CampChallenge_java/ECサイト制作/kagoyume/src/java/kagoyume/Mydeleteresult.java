@@ -30,13 +30,15 @@ public class Mydeleteresult extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
+        try {
             
-            //取得文字を変換
-            request.setCharacterEncoding("UTF-8");
-            int userID = Integer.parseInt(request.getParameter("userID"));
-            
-            UserDataDAO.getInstance().delete(userID);
+            if (request.getParameter("userID") != null) {
+                //取得文字を変換
+                request.setCharacterEncoding("UTF-8");
+                int userID = Integer.parseInt(request.getParameter("userID"));
+
+                UserDataDAO.getInstance().delete(userID);
+            }
             
             request.getRequestDispatcher("/mydeleteresult.jsp").forward(request, response);
         }catch(Exception e) {
